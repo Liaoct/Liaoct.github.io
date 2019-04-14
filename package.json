@@ -1,0 +1,25 @@
+{
+  "name": "springliao.github.io",
+  "version": "1.0.0",
+  "description": "Spring's Blog.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SpringLIAO/SpringLIAO.github.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SpringLIAO/SpringLIAO.github.io/issues"
+  },
+  "homepage": "https://github.com/SpringLIAO/SpringLIAO.github.io#readme",
+  "devDependencies": {
+    "vuepress": "^1.0.0-alpha.47",
+    "vuepress-theme-meteorlxy": "^1.0.0-alpha.34"
+  }
+}
