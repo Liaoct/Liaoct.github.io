@@ -51,8 +51,8 @@ module.exports = {
         sns: {
           // Github 帐号和链接
           github: {
-            account: 'SpringLIAO',
-            link: 'https://github.com/SpringLIAO',
+            account: 'Liaoct',
+            link: 'https://github.com/Liaoct',
           }
         },
       },
@@ -81,13 +81,13 @@ module.exports = {
         { text: 'Posts', link: '/posts/', exact: false },
         { text: 'Projects', link: '/projects' },
         { text: 'About', link: '/about' },
-        { text: 'Github', link: 'https://github.com/SpringLIAO'}
+        { text: 'Github', link: 'https://github.com/Liaoct'}
       ],
   
       // 评论配置，参考下方 [页面评论] 章节
       comments: {
-        owner: 'SpringLIAO',
-        repo: 'springliao.github.io',
+        owner: 'Liaoct',
+        repo: 'Liaoct.github.io',
         clientId: 'ffb7e29d2af678870996',
         clientSecret: '86fc65962d6bce52c5d7493f1213fb48864f8a01',
         prefix: '[Comments] ',
