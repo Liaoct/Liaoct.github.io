@@ -88,8 +88,8 @@ module.exports = {
       comments: {
         owner: 'Liaoct',
         repo: 'Liaoct.github.io',
-        clientId: 'ffb7e29d2af678870996',
-        clientSecret: '86fc65962d6bce52c5d7493f1213fb48864f8a01',
+        clientId: 'c176f1463ba53e0db662',
+        clientSecret: 'c797b2e12086ce487582d2adcb03e7cabd3d5667',
         prefix: '[Comments] ',
         labels: ['comments'],
         autoCreateIssue: process.env.NODE_ENV !== 'development',
