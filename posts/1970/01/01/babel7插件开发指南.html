@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Babel 7插件开发指南 | Spring&#39;s Blog</title>
+    <meta name="description" content="This is my blog">
+    <meta name="generator" content="VuePress 1.4.0">
+    <link rel="preload" href="/assets/css/0.styles.68fc7f4f.css" as="style"><link rel="preload" href="/assets/js/app.1fedd593.js" as="script"><link rel="preload" href="/assets/js/7.a84724ec.js" as="script"><link rel="preload" href="/assets/js/17.5edb4991.js" as="script"><link rel="prefetch" href="/assets/js/1.5e60455b.js"><link rel="prefetch" href="/assets/js/10.963015d4.js"><link rel="prefetch" href="/assets/js/11.bbdb8431.js"><link rel="prefetch" href="/assets/js/12.d28a4fb6.js"><link rel="prefetch" href="/assets/js/13.ec444d9a.js"><link rel="prefetch" href="/assets/js/14.382c23e1.js"><link rel="prefetch" href="/assets/js/15.3c34bf9d.js"><link rel="prefetch" href="/assets/js/16.0742e7df.js"><link rel="prefetch" href="/assets/js/18.ef3b2a7d.js"><link rel="prefetch" href="/assets/js/3.1bd0962d.js"><link rel="prefetch" href="/assets/js/4.50125354.js"><link rel="prefetch" href="/assets/js/5.70fd1a16.js"><link rel="prefetch" href="/assets/js/6.0ca51925.js"><link rel="prefetch" href="/assets/js/8.5276ce38.js"><link rel="prefetch" href="/assets/js/9.5a5a3c76.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.68fc7f4f.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div id="vuepress-theme-meteorlxy"><header class="header" style="background-size:cover;background-repeat:no-repeat;background-position:center;background-attachment:scroll;background-image:url(/banner.jpg);" data-v-7a046aea><div data-v-e4145d0a data-v-7a046aea><nav class="navbar" data-v-e4145d0a><div class="container" data-v-e4145d0a><a href="/" class="router-link-active" data-v-e4145d0a><span class="navbar-site-name" data-v-e4145d0a>
+          Spring's Blog
+        </span></a> <div class="navbar-toggler" data-v-e4145d0a><svg class="icon" style="font-size:1.2em;" data-v-e4145d0a data-v-e4145d0a><title data-v-e4145d0a data-v-e4145d0a>menu</title><use xlink:href="#icon-menu" data-v-e4145d0a data-v-e4145d0a></use></svg></div> <div class="navbar-links" data-v-e4145d0a><a href="/" class="navbar-link" data-v-e4145d0a>
+            Home
+          </a><a href="/posts/" class="navbar-link router-link-active" data-v-e4145d0a>
+            Posts
+          </a><a href="/projects" class="navbar-link" data-v-e4145d0a>
+            Projects
+          </a><a href="/about" class="navbar-link" data-v-e4145d0a>
+            About
+          </a><a href="https://github.com/Liaoct" target="_blank" rel="noopener noreferrer" class="navbar-link" data-v-e4145d0a><span data-v-e4145d0a>Github</span> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" data-v-e4145d0a data-v-e4145d0a><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div></div></nav> <div class="navbar-holder" style="display:none;" data-v-e4145d0a></div></div> <div class="banner" data-v-98d6aa8c data-v-7a046aea data-v-7a046aea><div class="container" data-v-98d6aa8c><div class="center" data-v-98d6aa8c><h1 data-v-98d6aa8c data-v-7a046aea>
+          Babel 7插件开发指南
+        </h1></div></div></div></header> <div class="container clearfix show-aside" data-v-4dd605a1 data-v-4dd605a1><main class="main" data-v-4dd605a1><div class="post" data-v-4dd605a1 data-v-4dd605a1><section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><!----> <span class="update-date" data-v-4e23451f>
+      Updated : 2019-04-14
+    </span></section> <section class="post-links" data-v-4e23451f><!----> <!----></section></section> <article class="main-div"><div class="post-content content content__default"><p>Babel的三个主要处理步骤分别是：解析（parse）、转换（transform）、生成（generate）。</p> <p><strong>解析</strong></p> <p>解析步骤主要是接受源代码并输出抽象语法树（AST）。此步骤主要由<code>@babel/parser</code>（原<code>Babylon</code>）负责解析和理解js代码，输出对应的AST。</p> <p><strong>转换</strong></p> <p>转换步骤主要是接受AST，并对其进行遍历，在此过程中会进行分析和修改AST，这也是Babel插件主要工作的地方。此步骤主要用到<code>@babel/traverse</code>和<code>@babel/types</code>两个包。</p> <p><strong>生成</strong></p> <p>生成步骤主要是将（经过一系列转换之后的）AST再转换为正常的字符串代码。此步骤主要由<code>@babel/generator</code>深度优先遍历整个AST，然后构建可以表示转换后代码的字符串。</p> <h1 id="抽象语法树（ast）"><a href="#抽象语法树（ast）" aria-hidden="true" class="header-anchor">#</a> 抽象语法树（AST）</h1> <p>学过《编译原理》的童鞋应该都知道AST，即使不知道也没关系，我们可以通过<code>astexplorer</code>在线查看。</p> <p><img src="https://user-images.githubusercontent.com/11884369/55702696-f13ca600-5a09-11e9-9cff-adec9a70821a.png" alt="astexplorer"></p> <p>如上所示。</p> <div class="language- extra-class"><pre class="language-text"><code>function square(n) {
+  return n * n;
+}
+</code></pre></div><p>这段代码可以表示成如下所示的一棵树：</p> <div class="language- extra-class"><pre class="language-text"><code>{
+  type: &quot;FunctionDeclaration&quot;,
+  id: {
+    type: &quot;Identifier&quot;,
+    name: &quot;square&quot;
+  },
+  params: [{
+    type: &quot;Identifier&quot;,
+    name: &quot;n&quot;
+  }],
+  body: {
+    type: &quot;BlockStatement&quot;,
+    body: [{
+      type: &quot;ReturnStatement&quot;,
+      argument: {
+        type: &quot;BinaryExpression&quot;,
+        operator: &quot;*&quot;,
+        left: {
+          type: &quot;Identifier&quot;,
+          name: &quot;n&quot;
+        },
+        right: {
+          type: &quot;Identifier&quot;,
+          name: &quot;n&quot;
+        }
+      }
+    }]
+  }
+}
+</code></pre></div><blockquote><p>可以使用json对象表示AST，出于简化的目的，上面移除了部分属性</p></blockquote> <p>这个AST中的每一层结构叫做<code>节点(node)</code>，一个AST可以由单一的节点或是成百上千个节点构成。 它们组合在一起可以描述用于静态分析的程序语法。</p> <p>每一个节点都有如下所示的接口（Interface）：</p> <div class="language- extra-class"><pre class="language-text"><code>interface Node {
+  type: string;
+}
+</code></pre></div><p>字符串形式的 type 字段表示节点的类型（如： &quot;FunctionDeclaration&quot;，&quot;Identifier&quot;，或 &quot;BinaryExpression&quot;）。 每一种类型的节点定义了一些附加属性用来进一步描述该节点类型。</p> <p>Babel插件就是对这些节点进行添加、更新和删除。</p> <h1 id="路径（path）"><a href="#路径（path）" aria-hidden="true" class="header-anchor">#</a> 路径（Path）</h1> <p>AST能够表示语法的结构，但是我们对节点进行操作时，更多的是希望获得节点之间的联系。</p> <p><strong>Path</strong>是表示两个节点之间连接的对象。</p> <p>例如，如果有下面这样一个节点及其子节点︰</p> <div class="language- extra-class"><pre class="language-text"><code>{
+  type: &quot;FunctionDeclaration&quot;,
+  id: {
+    type: &quot;Identifier&quot;,
+    name: &quot;square&quot;
+  },
+  ...
+}
+</code></pre></div><p>将子节点<code>Identifier</code>表示为一个路径（Path）的话，看起来是这样的：</p> <div class="language- extra-class"><pre class="language-text"><code>{
+  &quot;parent&quot;: {
+    &quot;type&quot;: &quot;FunctionDeclaration&quot;,
+    &quot;id&quot;: {...},
+    ....
+  },
+  &quot;node&quot;: {
+    &quot;type&quot;: &quot;Identifier&quot;,
+    &quot;name&quot;: &quot;square&quot;
+  }
+}
+</code></pre></div><p>同时它还包含关于该路径的其他元数据：</p> <div class="language- extra-class"><pre class="language-text"><code>{
+  &quot;parent&quot;: {...},
+  &quot;node&quot;: {...},
+  &quot;hub&quot;: {...},
+  &quot;contexts&quot;: [],
+  &quot;data&quot;: {},
+  &quot;shouldSkip&quot;: false,
+  &quot;shouldStop&quot;: false,
+  &quot;removed&quot;: false,
+  &quot;state&quot;: null,
+  &quot;opts&quot;: null,
+  &quot;skipKeys&quot;: null,
+  &quot;parentPath&quot;: null,
+  &quot;context&quot;: null,
+  &quot;container&quot;: null,
+  &quot;listKey&quot;: null,
+  &quot;inList&quot;: false,
+  &quot;parentKey&quot;: null,
+  &quot;key&quot;: null,
+  &quot;scope&quot;: null,
+  &quot;type&quot;: null,
+  &quot;typeAnnotation&quot;: null
+}
+</code></pre></div><p>在某种意义上，路径是一个节点在树中的位置以及关于该节点各种信息的响应式<code>Reactive</code>表示。路径对象还包含添加、更新、移动和删除节点有关的其他很多方法，当你调用一个修改树的方法后，路径信息也会被更新。</p> <p><code>@babel/traverse</code>这个独立的包对AST进行遍历，解析出整个树的<code>path</code>，并更新节点。</p> <h1 id="访问者（visitor）"><a href="#访问者（visitor）" aria-hidden="true" class="header-anchor">#</a> 访问者（visitor）</h1> <p><code>@babel/traverse</code>遍历AST时，会依次进入每个节点。</p> <p>假设有如下AST结构：</p> <div class="language- extra-class"><pre class="language-text"><code>- FunctionDeclaration
+  - Identifier (id)
+  - Identifier (params[0])
+  - BlockStatement (body)
+    - ReturnStatement (body)
+      - BinaryExpression (argument)
+        - Identifier (left)
+        - Identifier (right)
+</code></pre></div><p>则遍历过程如下：</p> <ul><li>进入 <code>FunctionDeclaration</code> <ul><li>进入 <code>Identifier (id)</code></li> <li>走到尽头</li> <li>退出 <code>dentifier (id)</code></li> <li>进入 <code>Identifier (params[0])</code></li> <li>走到尽头</li> <li>退出 <code>Identifier (params[0])</code></li> <li>进入 <code>BlockStatement (body)</code></li> <li>进入 <code>ReturnStatement (body)</code> <ul><li>进入 <code>BinaryExpression (argument)</code></li> <li>进入 <code>Identifier (left)</code> <ul><li>走到尽头</li></ul></li> <li>退出 <code>Identifier (left)</code></li> <li>进入 <code>Identifier (right)</code> <ul><li>走到尽头</li></ul></li> <li>退出 <code>Identifier (right)</code></li> <li>退出 <code>BinaryExpression (argument)</code></li></ul></li> <li>退出 <code>ReturnStatement (body)</code></li> <li>退出 <code>BlockStatement (body)</code></li></ul></li> <li>退出 <code>FunctionDeclaration</code></li></ul> <p>当我们说进入某一个节点，实际上是说我们在<strong>访问</strong>他们。</p> <p>访问者简单的说就是一个对象，它定义了在树状机构的遍历中，如何获取节点的方法。</p> <div class="language- extra-class"><pre class="language-text"><code>const MyVisitor = {
+  Identifier() {
+    console.log(&quot;Called!&quot;);
+  }
+};
+</code></pre></div><p>这是一个简单的访问者，把它用于遍历中时，每当在树中遇见一个<code>Identifier</code>的时候会调用<code>Identifier()</code>方法。</p> <p>所以在下面的代码中<code>Identifier()</code>方法会被调用四次（包括<code>square</code>在内，总共有四个<code>Identifier</code>）。</p> <div class="language- extra-class"><pre class="language-text"><code>function square(n) {
+  return n * n;
+}
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>traverse(ast, MyVisitor);
+Called!
+Called!
+Called!
+Called!
+</code></pre></div><p>这些调用都发生在进入节点时，不过有时候我们也可以在退出时调用访问者方法。</p> <div class="language- extra-class"><pre class="language-text"><code>const MyVisitor = {
+  Identifier: {
+    enter() {
+      console.log(&quot;Entered!&quot;);
+    },
+    exit() {
+      console.log(&quot;Exited!&quot;);
+    }
+  }
+};
+</code></pre></div><p>因此，对于一个具体的节点我们有两次访问的机会。</p> <p>当你有一个<code>Identifier()</code>成员方法的访问者时，你实际上是在访问路径而非节点。通过这种方式，你操作的就是节点的响应式表示（译注：即路径）而非节点本身。</p> <div class="language- extra-class"><pre class="language-text"><code>const parser = require(&quot;@babel/parser&quot;);
+const traverse = require(&quot;@babel/traverse&quot;).default;
+const code = `function square(n) {
+  return n * n;
+}`;
+const ast = parser.parse(code);
+const MyVisitor = {
+    Identifier: {
+      enter(path) {
+        console.log(`${path.node.name} Entered!`);
+      },
+      exit(path) {
+        console.log(`${path.node.name} Exited!`);
+      }
+    }
+  };
+traverse(ast, MyVisitor);
+</code></pre></div><p>输出结果如下：</p> <div class="language- extra-class"><pre class="language-text"><code>Identifier square Entered!
+Identifier square Exited!
+Identifier n Entered!
+Identifier n Exited!
+Identifier n Entered!
+Identifier n Exited!
+Identifier n Entered!
+Identifier n Exited!
+</code></pre></div><h1 id="初窥插件"><a href="#初窥插件" aria-hidden="true" class="header-anchor">#</a> 初窥插件</h1> <p>从上面的示例我们已经知道如何访问节点，现在我们可以操作节点。</p> <div class="language- extra-class"><pre class="language-text"><code>const parser = require(&quot;@babel/parser&quot;);
+const traverse = require(&quot;@babel/traverse&quot;).default;
+const generate = require(&quot;@babel/generator&quot;).default;
+const code = `function square(n) {
+  return n * n;
+}`;
+const ast = parser.parse(code);
+const MyVisitor = {
+    enter(path) { // enter会在每个节点进入时执行
+        if (
+            path.node.type === &quot;Identifier&quot; &amp;&amp;
+            path.node.name === &quot;n&quot;
+        ) {
+            path.node.name = &quot;x&quot;;
+        }
+    }
+};
+traverse(ast, MyVisitor);
+const result = generate(ast);
+console.log(result.code);
+</code></pre></div><p>输出结果：</p> <div class="language- extra-class"><pre class="language-text"><code>function square(x) {
+  return x * x;
+}
+</code></pre></div><p>这便是Babel插件的基本运行原理。</p> <h1 id="babel-types工具库"><a href="#babel-types工具库" aria-hidden="true" class="header-anchor">#</a> <code>@Babel/types</code>工具库</h1> <p><code>@Babel/Types</code>模块是一个用于 AST 节点的<code>Lodash</code>式工具库，它包含了构造、验证以及变换 AST 节点的方法。 该工具库包含考虑周到的工具方法，对编写处理AST逻辑非常有用。</p> <div class="language- extra-class"><pre class="language-text"><code>const t = require(&quot;@babel/types&quot;);
+...
+const MyVisitor = {
+    enter(path) {
+        if (t.isIdentifier(path.node, { name: &quot;n&quot; })) {
+            path.replaceWith(t.identifier('x'))
+          }
+    }
+};
+...
+</code></pre></div><p>这里使用<code>isIdentifier(path.node, { name: &quot;n&quot; })</code>验证值为<code>n</code>的<code>Identifier</code>节点。然后使用<code>identifier('x')</code>创建一个值为<code>x</code>的节点进行替换。</p> <p>输出结果一致。</p> <p><code>@Babel/Types</code>还提供了多种节点类型的构造、验证方法（eg：<code>binaryExpression</code>、<code>returnStatement</code>、<code>classDeclaration</code>），详细请查阅文档。</p> <p>判断节点类型时，在类型名称前加<code>is</code>，然后将类型名称第一个字母变成大写，例如<code>isIdentifier</code>，该方法还有另外一个版本<code>assetIdentifier</code>(抛出异常，而不是返回true 与 false)。</p> <p>创建一个类型节点时（用于插入AST中，或者替换AST中的节点），直接调用节点类型函数，类型名称第一个字母小写，例如<code>identifier('x')</code>。</p> <h1 id="转换操作函数"><a href="#转换操作函数" aria-hidden="true" class="header-anchor">#</a> 转换操作函数</h1> <p><code>Path</code>对象提供了添加、更新、移动和删除等一系列节点操作方法。</p> <ul><li><code>get</code>：获取子节点属性</li> <li><code>isReferencedIdentifier</code>：检查标示符（Identifier）是否被引用</li> <li><code>findParent</code>：向父路径搜索节点</li> <li><code>find</code>：向父节点搜索节点，并且搜索本节点</li> <li><code>getFunctionParent</code>：查找最接近的父函数或程序</li> <li><code>getStatementParent</code>：向上遍历语法树，直到找到在列表中的父节点路径</li> <li><code>inList</code>：判断路径是否有同级节点</li> <li><code>getSibling</code>：获得同级路径</li> <li><code>key</code>：获取路径所在容器的索引</li> <li><code>container</code>：获取路径的容器（包含所有同级节点的数组）</li> <li><code>skip</code>：停止子节点的遍历</li> <li><code>stop</code>：停止整个路径的遍历</li> <li><code>replaceWith</code>：替换节点</li> <li><code>replaceWithMultiple</code>：用多节点替换单节点</li> <li><code>replaceWithSourceString</code>：用字符串源码替换节点</li> <li><code>insertBefore</code>：在当前节点之前插入兄弟节点</li> <li><code>insertAfter</code>：在当前节点之前插入兄弟节点</li> <li><code>unshiftContainer</code>：在节点容器的开始插入节点</li> <li><code>pushContainer</code>：在节点容器的结尾插入节点</li> <li><code>remove</code>：删除节点（自身）</li></ul> <p>...</p> <p>更多函数与使用方法参考<code>babel-handbook</code>。</p> <h1 id="第一个babel插件"><a href="#第一个babel插件" aria-hidden="true" class="header-anchor">#</a> 第一个Babel插件</h1> <p><strong>插件分析</strong></p> <p>假设我想把所有的如下代码：</p> <div class="language- extra-class"><pre class="language-text"><code>var hasBarProperty = foo.hasOwnProperty(&quot;bar&quot;);
+var isPrototypeOfBar = foo.isPrototypeOf(bar);
+var barIsEnumerable = foo.propertyIsEnumerable(&quot;bar&quot;);
+</code></pre></div><p>转换成这种写法：</p> <div class="language- extra-class"><pre class="language-text"><code>var hasBarProperty = Object.prototype.hasOwnProperty.call(foo, &quot;bar&quot;);
+var isPrototypeOfBar = Object.prototype.isPrototypeOf.call(foo, bar);
+var barIsEnumerable = Object.prototype.propertyIsEnumerable.call(foo, &quot;bar&quot;);
+</code></pre></div><p>这里主要目的是将<code>Object.prototype</code>上的方法调用，改成<code>Object.prototype.propertyIsEnumerable.call()</code>形式。</p> <p>这里以转换<code>hasOwnProperty</code>为例，先在<code>astexplorer</code>观察待处理AST(<code>foo.hasOwnProperty(&quot;bar&quot;)</code>)与目标AST(<code>Object.prototype.hasOwnProperty.call(foo, &quot;bar&quot;)</code>)结构。</p> <p>待处理的<code>foo.hasOwnProperty(&quot;bar&quot;)</code>的AST大致如下：</p> <div class="language- extra-class"><pre class="language-text"><code>{
+    &quot;type&quot;: &quot;CallExpression&quot;,
+    &quot;loc&quot;: {...},
+    &quot;callee&quot;: {
+        &quot;type&quot;: &quot;MemberExpression&quot;,
+        &quot;loc&quot;: {...},
+        &quot;object&quot;: {
+            &quot;type&quot;: &quot;Identifier&quot;,
+            &quot;loc&quot;: {...},
+            &quot;name&quot;: &quot;foo&quot;
+        },
+        &quot;property&quot;: {
+            &quot;type&quot;: &quot;Identifier&quot;,
+            &quot;loc&quot;: {...},
+            &quot;name&quot;: &quot;hasOwnProperty&quot;
+        },
+        &quot;computed&quot;: false
+    },
+    &quot;arguments&quot;: [
+        {
+            &quot;type&quot;: &quot;StringLiteral&quot;,
+            &quot;loc&quot;: {...},
+            &quot;value&quot;: &quot;bar&quot;
+        }
+    ]
+}
+</code></pre></div><p>期望转换为<code>Object.prototype.hasOwnProperty.call(foo, &quot;bar&quot;)</code>的目标AST大致如下：</p> <div class="language- extra-class"><pre class="language-text"><code>
+{
+    &quot;type&quot;: &quot;CallExpression&quot;,
+    &quot;loc&quot;: {...},
+    &quot;callee&quot;: {
+        &quot;type&quot;: &quot;MemberExpression&quot;,
+        &quot;loc&quot;: {...},
+        &quot;object&quot;: {
+            &quot;type&quot;: &quot;MemberExpression&quot;,
+            &quot;loc&quot;: {...},
+            &quot;object&quot;: {
+                &quot;type&quot;: &quot;MemberExpression&quot;,
+                &quot;loc&quot;: {...},
+                &quot;object&quot;: {
+                    &quot;type&quot;: &quot;Identifier&quot;,
+                    &quot;loc&quot;: {...},
+                    &quot;name&quot;: &quot;Object&quot;
+                },
+                &quot;property&quot;: {
+                    &quot;type&quot;: &quot;Identifier&quot;,,
+                    &quot;loc&quot;: {...},
+                    &quot;name&quot;: &quot;prototype&quot;
+                },
+                &quot;computed&quot;: false
+            },
+            &quot;property&quot;: {
+                &quot;type&quot;: &quot;Identifier&quot;,
+                &quot;loc&quot;: {...},
+                &quot;name&quot;: &quot;hasOwnProperty&quot;
+            },
+            &quot;computed&quot;: false
+        },
+        &quot;property&quot;: {
+            &quot;type&quot;: &quot;Identifier&quot;,
+            &quot;loc&quot;: {...},
+            &quot;name&quot;: &quot;call&quot;
+        },
+        &quot;computed&quot;: false
+    },
+    &quot;arguments&quot;: [
+        {
+            &quot;type&quot;: &quot;Identifier&quot;,
+            &quot;loc&quot;: {...},
+            &quot;name&quot;: &quot;foo&quot;
+        },
+        {
+            &quot;type&quot;: &quot;StringLiteral&quot;,
+            &quot;loc&quot;: {... },
+            &quot;value&quot;: &quot;bar&quot;
+        }
+    ]
+}
+</code></pre></div><p>根据如上两个AST，转换的大致思路为：</p> <ul><li>编写一个<code>CallExpression</code>访问者</li> <li>获取<code>CallExpression.callee</code>，该节点为<code>MemberExpression</code>类型，代表属性调用表达式（即<code>foo.hasOwnProperty</code>部分）。</li> <li>获取<code>CallExpression.arguments</code>，该节点是一个数组，代表参数部分（即<code>&quot;bar&quot;</code>部分）。</li> <li>当<code>callee.object</code>为<code>Identifier</code>类型节点，并且<code>callee.property</code>为值为<code>hasOwnProperty</code>的<code>Identifier</code>节点时，则进行转换。</li> <li>构造一个<code>Object.prototype.hasOwnProperty.call</code>形式的<code>MemberExpression</code>嵌套节点。</li> <li>构造时，先构造最下面一层的<code>MemberExpression</code>节点，即<code>Object.prototype</code>部分，以此类推，构造完整的<code>Object.prototype.hasOwnProperty.call</code>。</li> <li>然后再构造一个新的<code>CallExpression</code>节点，其中新的参数为原<code>CallExpression.callee.object</code>的值，与原参数组成的数组。</li> <li>用新的<code>CallExpression</code>节点替换原来的节点。</li></ul> <p><strong>编写插件</strong></p> <p>新建如下结构项目：</p> <div class="language- extra-class"><pre class="language-text"><code>--plugins
+  |--babel-plugin-transform-object-prototype-methods.js
+--index.js
+--.babelrc
+--package.json
+</code></pre></div><p>分别有如下代码：</p> <div class="language- extra-class"><pre class="language-text"><code>// index.js
+var hasBarProperty = foo.hasOwnProperty(&quot;bar&quot;);
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>// plugins/babel-plugin-transform-object-prototype-methods.js
+module.exports = function (babel) {
+    const { types: t } = babel;
+    return {
+        name: &quot;ast-transform&quot;, // not required
+        visitor: {
+          CallExpression(path) {
+              const memberExp = path.get(&quot;callee&quot;);
+              const arg = path.get(&quot;arguments.0&quot;);
+              const memberProperty = memberExp.get(&quot;property&quot;);
+              const memberObject = memberExp.get(&quot;object&quot;);
+              if (t.isIdentifier(memberProperty) &amp;&amp; memberProperty.node.name === &quot;hasOwnProperty&quot;) { // 对`hasOwnProperty`方法调用的节点进行转换
+                const objectMemberExp = t.MemberExpression(t.Identifier(&quot;Object&quot;), t.Identifier(&quot;prototype&quot;)); // 构造`Object.prototype`的`MemberExpression`节点
+                const prototypeMemberExp = t.MemberExpression(objectMemberExp, t.Identifier(&quot;hasOwnProperty&quot;)); // 构造`Object.prototype.hasOwnProperty`的`MemberExpression`节点
+                const hasOwnPropertyMemberExp = t.MemberExpression(prototypeMemberExp, t.Identifier(&quot;call&quot;)); // 构造`Object.prototype.hasOwnProperty.call`的`MemberExpression`节点
+                const newCallExpression = t.callExpression(hasOwnPropertyMemberExp, [memberObject.node, arg.node]); // 构造`Object.prototype.hasOwnProperty.call(p, &quot;bar&quot;)`的`callExpression`节点
+                path.replaceWith(newCallExpression); // 使用新节点替换
+              }
+            }
+        }
+    };
+}
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>// .babelrc
+{
+    &quot;plugins&quot;: [
+        &quot;./plugins/babel-plugin-transform-object-prototype-methods&quot;
+    ]
+}
+</code></pre></div><p>在使用插件之前需要先安装依赖：</p> <div class="language- extra-class"><pre class="language-text"><code>yarn add @babel/core @babel/cli -D
+</code></pre></div><p>执行如下命令，使用<code>babel-plugin-transform-object-prototype-methods</code>插件转换代码：</p> <div class="language- extra-class"><pre class="language-text"><code>npx babel index.js -o output.js
+</code></pre></div><p>查看输出文件<code>output.js</code>：</p> <div class="language- extra-class"><pre class="language-text"><code>var hasBarProperty = Object.prototype.hasOwnProperty.call(foo, &quot;bar&quot;);
+</code></pre></div><p>源代码已经正确转换。</p> <p>从上可知：</p> <ul><li>babel插件是一个函数。</li> <li>该函数接受一个<code>babel</code>对象作为参数。</li> <li><code>babel.types</code>可直接使用<code>@babel/types</code>模块，在插件中不用单独引入。</li> <li>在特定的类型访问者中，可以获取节点，以及添加、删除、替换节点等操作。</li> <li>babel插件函数可以被<code>.babelrc</code>配置文件，或者命令行<code>--plugins</code>参数，或者<code>babel.transform</code>的<code>plugins</code>选项加载。</li></ul> <p><strong>完善插件功能</strong></p> <p>下面来完善插件功能，让该插件可以处理<code>hasOwnProperty</code>、<code>isPrototypeOf</code>、<code>propertyIsEnumerable</code>三种类型。</p> <div class="language- extra-class"><pre class="language-text"><code>// plugins/babel-plugin-transform-object-prototype-methods.js
+module.exports = function (babel) {
+  const { types: t } = babel;
+  const PropertySchema = {
+    hasOwnProperty: {
+      type: &quot;boolean&quot;,
+      default: true
+    },
+    isPrototypeOf: {
+      type: &quot;boolean&quot;,
+      default: true
+    },
+    propertyIsEnumerable: {
+      type: &quot;boolean&quot;,
+      default: true
+    }
+  };
+  return {
+      name: &quot;transform-object-prototype-methods&quot;, // not required
+      visitor: {
+        CallExpression(path) {
+            const memberExp = path.get(&quot;callee&quot;);
+            const arg = path.get(&quot;arguments.0&quot;);
+            const memberProperty = memberExp.get(&quot;property&quot;);
+            const memberObject = memberExp.get(&quot;object&quot;);
+            if (t.isIdentifier(memberProperty) &amp;&amp; PropertySchema[memberProperty.node.name]) {
+              const objectMemberExp = t.MemberExpression(t.Identifier(&quot;Object&quot;), t.Identifier(&quot;prototype&quot;));
+              const prototypeMemberExp = t.MemberExpression(objectMemberExp, t.Identifier(memberProperty.node.name));
+              const callMemberExp = t.MemberExpression(prototypeMemberExp, t.Identifier(&quot;call&quot;));
+              const newCallExpression = t.callExpression(callMemberExp, [memberObject.node, arg.node]);
+              path.replaceWith(newCallExpression);
+            }
+          }
+      }
+  };
+}
+</code></pre></div><p>现在以下代码均可正确转换：</p> <div class="language- extra-class"><pre class="language-text"><code>var hasBarProperty = foo.hasOwnProperty(&quot;bar&quot;);
+var isPrototypeOfBar = foo.isPrototypeOf(bar);
+var barIsEnumerable = foo.propertyIsEnumerable(&quot;bar&quot;);
+if(foo.hasOwnProperty(&quot;bar&quot;)) {}
+if(foo.isPrototypeOf(bar)) {}
+if(foo.propertyIsEnumerable(&quot;bar&quot;)) {}
+</code></pre></div><p><strong>插件选项</strong></p> <p>下面我们让该插件可以接受插件选项，并根据选项开启或禁用转换：</p> <div class="language- extra-class"><pre class="language-text"><code>{
+    &quot;plugins&quot;: [
+        [&quot;./plugins/babel-plugin-transform-object-prototype-methods&quot;, {
+            &quot;hasOwnProperty&quot;: true,
+            &quot;isPrototypeOf&quot;: false
+        }]
+    ]
+}
+</code></pre></div><p>修改插件：</p> <div class="language- extra-class"><pre class="language-text"><code>module.exports = function (babel) {
+  const { types: t } = babel;
+  const PropertySchema = {
+    hasOwnProperty: {
+      type: &quot;boolean&quot;,
+      default: true
+    },
+    isPrototypeOf: {
+      type: &quot;boolean&quot;,
+      default: true
+    },
+    propertyIsEnumerable: {
+      type: &quot;boolean&quot;,
+      default: true
+    }
+  };
+  // 默认插件选项
+  const defaultOpts = {
+    hasOwnProperty: PropertySchema.hasOwnProperty.default,
+    isPrototypeOf: PropertySchema.isPrototypeOf.default,
+    propertyIsEnumerable: PropertySchema.propertyIsEnumerable.default
+  };
+  return {
+      name: &quot;ast-transform&quot;, // not required
+      visitor: {
+        CallExpression(path, state) {
+            const memberExp = path.get(&quot;callee&quot;);
+            const arg = path.get(&quot;arguments.0&quot;);
+            const memberProperty = memberExp.get(&quot;property&quot;);
+            const memberObject = memberExp.get(&quot;object&quot;);
+            // 合并选项
+            const options = Object.assign({}, defaultOpts, state.opts);
+            const propertyName = memberProperty.node.name;
+            // 只有规定的`Object.prototype`原型方法，并且只有启用转换该原型方法时，才会被转换
+            if (t.isIdentifier(memberProperty) &amp;&amp; PropertySchema[propertyName] &amp;&amp; options[propertyName]) {
+              const objectMemberExp = t.MemberExpression(t.Identifier(&quot;Object&quot;), t.Identifier(&quot;prototype&quot;));
+              const prototypeMemberExp = t.MemberExpression(objectMemberExp, t.Identifier(propertyName));
+              const callMemberExp = t.MemberExpression(prototypeMemberExp, t.Identifier(&quot;call&quot;));
+              const newCallExpression = t.callExpression(callMemberExp, [memberObject.node, arg.node]);
+              path.replaceWith(newCallExpression);
+            }
+          }
+      }
+  };
+}
+</code></pre></div><p>现在插件选项已经可以工作了，转换结果如下：</p> <div class="language- extra-class"><pre class="language-text"><code>var hasBarProperty = Object.prototype.hasOwnProperty.call(foo, &quot;bar&quot;);
+var isPrototypeOfBar = foo.isPrototypeOf(bar);
+var barIsEnumerable = Object.prototype.propertyIsEnumerable.call(foo, &quot;bar&quot;);
+if (Object.prototype.hasOwnProperty.call(foo, &quot;bar&quot;)) {}
+if (foo.isPrototypeOf(bar)) {}
+if (Object.prototype.propertyIsEnumerable.call(foo, &quot;bar&quot;)) {}
+</code></pre></div><p><strong>恭喜你，你已经开始你的大佬（装逼）之路了。</strong></p></div></article> <section class="post-meta main-div" data-v-4e23451f><section class="post-date clearfix" data-v-4e23451f><!----> <span class="update-date" data-v-4e23451f>
+      Updated : 2019-04-14
+    </span></section> <section class="post-links" data-v-4e23451f><!----> <!----></section></section> <div id="post-comments" class="main-div"><!----></div></div></main> <aside class="aside" data-v-4dd605a1><div class="info-card main-div" data-v-9d847660 data-v-4dd605a1><div class="info-card-header" data-v-9d847660><img src="/avatar.jpg" alt="Spring Liao" class="info-avatar" data-v-9d847660></div> <div class="info-card-body" data-v-9d847660><section class="info-nickname" data-v-9d847660>
+      Spring Liao
+    </section> <section class="info-desc" data-v-9d847660>纵使我是诗人，也写不尽悲伤，满纸哀愁，泛着墨香。</section> <section class="info-contact" data-v-9d847660><section data-v-9d847660><span title="Cheng'du City, China" data-v-9d847660 data-v-9d847660><svg class="icon" style="font-size:1em;" data-v-9d847660 data-v-9d847660><title data-v-9d847660 data-v-9d847660>Cheng'du City, China</title><use xlink:href="#icon-location" data-v-9d847660 data-v-9d847660></use></svg><span class="info-text" data-v-9d847660 data-v-9d847660>
+          Cheng'du City, China
+        </span></span></section> <!----> <section data-v-9d847660><a href="mailto:389055604@qq.com" title="389055604@qq.com" data-v-9d847660 data-v-9d847660><svg class="icon" style="font-size:1em;" data-v-9d847660 data-v-9d847660><title data-v-9d847660 data-v-9d847660>389055604@qq.com</title><use xlink:href="#icon-email" data-v-9d847660 data-v-9d847660></use></svg><span class="info-text" data-v-9d847660 data-v-9d847660>
+          389055604@qq.com
+        </span></a></section></section></div> <div class="info-card-footer" data-v-9d847660><section class="info-sns clearfix" data-v-9d847660><a href="https://github.com/Liaoct" target="_blank" class="sns-link" data-v-9d847660><span title="GitHub: Liaoct" class="sns-icon" data-v-9d847660 data-v-9d847660><svg class="icon" style="font-size:1.5em;" data-v-9d847660 data-v-9d847660><title data-v-9d847660 data-v-9d847660>GitHub: Liaoct</title><use xlink:href="#icon-github" data-v-9d847660 data-v-9d847660></use></svg></span></a></section></div></div> <div class="post-nav-card main-div" style="position:relative;top:0;width:0px;" data-v-4dd605a1><!----> <div class="post-nav-comments"><svg class="icon"><title>comment</title><use xlink:href="#icon-comment"></use></svg> <a href="/posts/1970/01/01/babel7%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97.html#post-comments">
+      Comments
+    </a></div></div></aside></div> <footer class="footer" data-v-1375e54c><p class="footer-sns-links" data-v-1375e54c><a href="https://github.com/Liaoct" target="_blank" class="sns-link" data-v-1375e54c><span title="GitHub: Liaoct" class="sns-icon" data-v-1375e54c data-v-1375e54c><svg class="icon" style="font-size:25px;" data-v-1375e54c data-v-1375e54c><title data-v-1375e54c data-v-1375e54c>GitHub: Liaoct</title><use xlink:href="#icon-github" data-v-1375e54c data-v-1375e54c></use></svg></span></a></p> <p class="footer-text" data-v-1375e54c><span data-v-1375e54c>Powered by </span> <a href="https://github.com/vuejs/vuepress" target="_blank" data-v-1375e54c>
+      VuePress
+    </a> <span data-v-1375e54c> | </span> <a href="https://github.com/meteorlxy/vuepress-theme-meteorlxy" target="_blank" data-v-1375e54c>
+        meteorlxy
+      </a></p> <!----></footer></div><div class="global-ui"><!----><!----></div></div>
+    <script src="/assets/js/app.1fedd593.js" defer></script><script src="/assets/js/7.a84724ec.js" defer></script><script src="/assets/js/17.5edb4991.js" defer></script>
+  </body>
+</html>
