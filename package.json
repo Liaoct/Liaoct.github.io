@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Liaoct/Liaoct.github.io#readme",
   "devDependencies": {
-    "vuepress": "^1.0.0-alpha.47",
-    "vuepress-theme-meteorlxy": "^1.0.0-alpha.34"
+    "vuepress": "^1.4.0",
+    "vuepress-theme-meteorlxy": "^1.8.0"
   }
 }

@@ -1,6 +1,8 @@
 module.exports = {
     // 网站 Title
     title: 'Spring\'s Blog',
+
+    port: 8090,
   
     // 网站描述
     description: 'This is my blog',
@@ -88,8 +90,8 @@ module.exports = {
       comments: {
         owner: 'Liaoct',
         repo: 'Liaoct.github.io',
-        clientId: 'c176f1463ba53e0db662',
-        clientSecret: 'c797b2e12086ce487582d2adcb03e7cabd3d5667',
+        clientId: process.env.NODE_ENV === 'development' ? 'b23f2cb8b3dcfe392188' : 'c176f1463ba53e0db662',
+        clientSecret: process.env.NODE_ENV === 'development' ? '71e1f60b8655f8b4c7da9be867f26d5b01d489e9' : 'c797b2e12086ce487582d2adcb03e7cabd3d5667',
         prefix: '[Comments] ',
         labels: ['comments'],
         autoCreateIssue: process.env.NODE_ENV !== 'development',
